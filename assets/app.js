@@ -12,6 +12,17 @@
   const euros0 = (v) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
 
   $$('.store').forEach((a) => { a.href = APP_STORE_URL; a.rel = 'noopener'; });
+  // Bouton de l'en-tête : visible seulement une fois le hero dépassé.
+  new IntersectionObserver(([en]) => $('#top').classList.toggle('past', !en.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe($('.hero .actions'));
+  // Boutons App Store légèrement aimantés vers le pointeur.
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !reduce) $$('.badge').forEach((b) => {
+    b.addEventListener('pointermove', (e) => {
+      const r = b.getBoundingClientRect();
+      b.style.setProperty('--mx', ((e.clientX - r.left - r.width / 2) * 0.12).toFixed(1) + 'px');
+      b.style.setProperty('--my', ((e.clientY - r.top - r.height / 2) * 0.18).toFixed(1) + 'px');
+    });
+    b.addEventListener('pointerleave', () => { b.style.setProperty('--mx', '0px'); b.style.setProperty('--my', '0px'); });
+  });
 
   // ——— Sons (ceux de l'app), seulement après un geste ———
   const sound = (name, vol = 0.45) => { const a = new Audio('assets/sons/' + name + '.wav'); a.volume = vol; return () => { try { const c = a.cloneNode(); c.volume = vol; c.play().catch(() => {}); } catch (e) {} }; };
@@ -372,7 +383,8 @@
     spots.forEach((dx, i) => {
       const c = document.createElement('span');
       c.className = 'droppedcoin ' + ['', 'cu', 'ag', 'cu', ''][i];
-      c.style.left = ((ph.left - pr.left + dx) / pr.width * 100).toFixed(2) + '%';
+      const x = Math.max(8, Math.min(pr.width - 30, ph.left - pr.left + dx));
+      c.style.left = (x / pr.width * 100).toFixed(2) + '%';
       if (i === 2) c.style.bottom = 'calc(100% + 18px)';
       heroPlank.appendChild(c);
       c.animate([
