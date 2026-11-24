@@ -1,61 +1,215 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="intro">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bocaux — Assistance</title>
-<style>
-  :root { --wall:#EFDDBE; --paper:#F7EEDC; --ink:#3A2417; --ink2:#5E4030; --terra:#A8462A; --honey:#E2AE45; }
-  @media (prefers-color-scheme: dark) { :root { --wall:#271B13; --paper:#36271C; --ink:#F2E3C6; --ink2:#D2BC9A; --terra:#F09A7E; } }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--wall); color:var(--ink); font:17px/1.6 -apple-system, "Helvetica Neue", Arial, sans-serif; }
-  main { max-width:720px; margin:40px auto; padding:32px 28px; background:var(--paper); border:1.5px solid var(--ink); border-radius:6px 16px 6px 16px; box-shadow:4px 4px 0 var(--ink); }
-  h1, h2 { font-family: Georgia, "Times New Roman", serif; line-height:1.2; }
-  h1 { font-size:34px; margin:0 0 4px; }
-  h2 { font-size:22px; margin:32px 0 8px; }
-  h3 { font-size:17px; margin:20px 0 4px; }
-  .kicker { text-transform:uppercase; letter-spacing:.08em; font-size:13px; font-weight:600; color:var(--ink2); margin:0 0 6px; }
-  .contact { display:inline-block; margin:12px 0 4px; padding:12px 20px; background:var(--honey); color:#3A2417; border:2px solid #3A2417; border-radius:14px; box-shadow:0 4px 0 #3A2417; font-weight:600; text-decoration:none; }
-  a { color:var(--terra); }
-  p { margin:6px 0; }
-</style>
+<title>Bocaux — ton argent du mois, rangé en bocaux</title>
+<meta name="description" content="Bocaux, l'app iPhone de budget où ton argent du mois est rangé dans des bocaux de verre. Sans compte, sans banque connectée, rien ne quitte ton iPhone.">
+<meta name="theme-color" content="#EFDDBE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#271B13" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Bocaux — ton argent du mois, rangé en bocaux">
+<meta property="og:description" content="Le budget du mois, d'un coup d'œil. Sans compte, sans banque connectée.">
+<meta property="og:image" content="assets/img/og.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  // Thème avant le premier affichage : choix mémorisé, sinon celui de l'iPhone / du Mac.
+  (function () {
+    var t = null; try { t = localStorage.getItem('bocaux-theme'); } catch (e) {}
+    if (t ? t === 'nuit' : matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.classList.add('nuit');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.remove('intro');
+  })();
+</script>
 </head>
 <body>
+<!-- Motifs des couvercles (vichy, fer-blanc, laiton), partagés par tous les bocaux -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<pattern id="g-terra" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><rect class="gin" width="7" height="7"/><rect class="gt" width="3.5" height="7"/><rect class="gt" width="7" height="3.5"/></pattern>
+<pattern id="g-sage" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(6)"><rect class="gin" width="7" height="7"/><rect class="gs" width="3.5" height="7"/><rect class="gs" width="7" height="3.5"/></pattern>
+<pattern id="g-blue" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)"><rect class="gin" width="7" height="7"/><rect class="gb" width="3.5" height="7"/><rect class="gb" width="7" height="3.5"/></pattern>
+<pattern id="g-honey" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(9)"><rect class="gin" width="7" height="7"/><rect class="gh" width="3.5" height="7"/><rect class="gh" width="7" height="3.5"/></pattern>
+<pattern id="m-tin" width="4" height="4" patternUnits="userSpaceOnUse"><rect class="tinf" width="4" height="4"/></pattern>
+<pattern id="m-brass" width="4" height="4" patternUnits="userSpaceOnUse"><rect class="brassf" width="4" height="4"/></pattern>
+<symbol id="logo" viewBox="0 0 96 96"><rect fill="#C2603E" x="30" y="11" width="36" height="10" rx="3"/><rect fill="#3A2417" x="27" y="21" width="42" height="7" rx="3"/><path fill="#3A2417" fill-rule="evenodd" d="M28 26 h40 q12 0 12 12 v36 q0 10 -10 10 h-44 q-10 0 -10 -10 v-36 q0 -12 12 -12z M32 33 h32 q9 0 9 8 v31 q0 6 -6 6 h-38 q-6 0 -6 -6 v-31 q0 -8 9 -8z"/><path fill="#F7EEDC" d="M32 33 h32 q9 0 9 8 v31 q0 6 -6 6 h-38 q-6 0 -6 -6 v-31 q0 -8 9 -8z"/><path fill="#E2AE45" d="M23 60 q6 -5 13 -3 q6 -6 13 -2 q7 -5 13 -1 q6 -3 11 2 v16 q0 6 -6 6 h-38 q-6 0 -6 -6z"/><rect fill="#3A2417" x="28" y="38" width="3.5" height="14" rx="1.75" opacity=".25"/></symbol>
+</defs></svg>
+
+<a class="sr" href="#demo">Aller à la démo</a>
+
+<button class="cord" id="cord" type="button" aria-pressed="false" aria-label="Allumer la lampe (mode nuit)">
+  <span class="string"></span><span class="bead"></span><span class="tip" id="cordTip">tire-moi</span>
+</button>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="#"><svg aria-hidden="true"><use href="#logo"/></svg>Bocaux</a>
+    <nav aria-label="Navigation">
+      <a class="lnk" href="#demo">Essayer</a>
+      <a class="lnk" href="#mois">Le mois</a>
+      <a class="lnk" href="#widgets">Widgets</a>
+      <a class="btn btn-sm store" href="#">Télécharger</a>
+    </nav>
+  </div>
+</header>
+
 <main>
-  <p class="kicker">Bocaux · application iPhone</p>
-  <h1>Assistance</h1>
-  <p>Une question, un bug, une idée ? Écris-moi, je réponds en général sous 48 heures.</p>
-  <a class="contact" href="mailto:bryanbole.dev@gmail.com?subject=Bocaux%20%E2%80%94%20assistance">Écrire à bryanbole.dev@gmail.com</a>
-  <p><small>Indique si possible le modèle de ton iPhone, ta version d'iOS et ce qui s'est passé.</small></p>
+  <section class="hero" aria-labelledby="h1">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1 class="display" id="h1">Ton argent du mois, <span class="mark">rangé en bocaux.</span></h1>
+        <p class="lede">Ta paie tombe dans une jarre, tu la ranges dans tes bocaux, et chaque dépense sort du bon. Un coup d'œil sur l'étagère, et tu sais ce qu'il reste.</p>
+        <div class="actions">
+          <a class="btn store" href="#"><span><small>Télécharger sur</small>l'App Store</span></a>
+          <p class="note">sans compte, sans banque connectée</p>
+        </div>
+      </div>
+      <div class="hero-phone">
+        <div class="phone"><div class="scr"><img data-screen="etagere" src="assets/img/etagere-jour.webp" width="393" height="852" alt="L'écran principal de Bocaux : il reste 781,90 € ce mois-ci, rangés dans six bocaux sur une étagère." fetchpriority="high"></div></div>
+      </div>
+    </div>
+    <div class="plank" aria-hidden="true"></div>
+  </section>
 
-  <h2>Questions fréquentes</h2>
+  <section class="band demo" id="demo" aria-labelledby="demo-t">
+    <div class="wrap">
+      <div>
+        <h2 class="display" id="demo-t">Essaie, là, tout de suite.</h2>
+        <p class="body" style="margin-top:1.2rem">C'est le geste du 1er du mois dans Bocaux : ta paie arrive dans la jarre, et tu la répartis à la main entre tes bocaux.</p>
+        <div class="how" aria-hidden="true">
+          <p>appuie sur la jarre…</p>
+          <p>garde le doigt, la poignée grossit…</p>
+          <p>et lâche sur un bocal.</p>
+        </div>
+        <p class="sr">Au clavier : chaque bocal est un bouton qui y range 50 €. Le bouton « Suivre mes cibles » remplit tous les bocaux d'un coup.</p>
+      </div>
+      <div class="bench" id="bench">
+        <div class="stamp" id="stamp" aria-hidden="true">C'est rangé&nbsp;!</div>
+        <div class="pot-wrap">
+          <button class="pot" id="pot" type="button" aria-describedby="potAmt"><span class="art" id="potArt" style="display:block;width:clamp(110px,16vw,150px)"></span><span class="tag" style="--r:-3deg">À répartir</span></button>
+          <div class="potinfo"><p class="amt" id="potAmt" aria-live="polite">2 150,00 €</p><p class="sub" id="potSub">ta paie du mois, encore à répartir</p></div>
+        </div>
+        <div class="jars" id="jars"></div>
+        <div class="plank" aria-hidden="true"></div>
+        <div class="demo-bar">
+          <button class="btn ghost btn-sm" id="fill" type="button">Suivre mes cibles</button>
+          <button class="btn ghost btn-sm" id="reset" type="button">Recommencer</button>
+        </div>
+        <p class="done-msg" id="doneMsg" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="hand-coins" id="handful" aria-hidden="true"></div>
+  </section>
 
-  <h3>Comment ajouter de l'argent dans mes bocaux ?</h3>
-  <p>Le jour de paie, l'étagère te propose de saisir le montant reçu. Il tombe dans la jarre « À répartir ». Appuie sur la jarre, glisse vers un bocal et relâche, ou touche « Suivre mes cibles » pour tout ranger d'un coup. Tu peux aussi saisir la paie depuis Réglages › Saisir la paie du mois.</p>
+  <section class="band paper story" id="mois" aria-labelledby="mois-t">
+    <div class="wrap">
+      <div>
+        <h2 class="display sr" id="mois-t">Le reste du mois</h2>
+        <div class="steps" id="steps">
+          <article class="step" data-screen="depense">
+            <h3>Une dépense, à la caisse.</h3>
+            <p class="body">Tape le montant sur le clavier, choisis le bocal, encaisse. Les pièces sortent du bocal et le compte du jour se met à jour.</p>
+            <div class="m-phone phone"><div class="scr"><img data-screen="depense" src="assets/img/depense-jour.webp" width="393" height="852" loading="lazy" alt="Écran de dépense : un clavier de caisse enregistreuse et le choix du bocal."></div></div>
+          </article>
+          <article class="step" data-screen="carnet">
+            <h3>Chaque bocal a son carnet.</h3>
+            <p class="body">Toutes les dépenses du mois, écrites à la main, et ce que tu peux encore dépenser par jour jusqu'à la paie.</p>
+            <div class="m-phone phone"><div class="scr"><img data-screen="carnet" src="assets/img/carnet-jour.webp" width="393" height="852" loading="lazy" alt="Le carnet du bocal Courses, avec les dépenses du mois et le reste par jour."></div></div>
+          </article>
+          <article class="step" data-screen="transfert">
+            <h3>Un bocal à sec ? Un autre le dépanne.</h3>
+            <p class="body">Fais glisser quelques pièces d'un bocal à l'autre. Rien ne disparaît, tout se voit.</p>
+            <div class="m-phone phone"><div class="scr"><img data-screen="transfert" src="assets/img/transfert-jour.webp" width="393" height="852" loading="lazy" alt="Transfert de pièces d'un bocal vers un autre."></div></div>
+          </article>
+          <article class="step" data-screen="bilan">
+            <h3>Le mois, en une page.</h3>
+            <p class="body">À la fin du mois, le bilan tient sur une feuille. Ce qui reste peut partir tout seul dans l'Épargne.</p>
+            <div class="m-phone phone"><div class="scr"><img data-screen="bilan" src="assets/img/bilan-jour.webp" width="393" height="852" loading="lazy" alt="Le bilan du mois, bocal par bocal, avec le reste versé à l'épargne."></div></div>
+          </article>
+        </div>
+      </div>
+      <div class="sticky" aria-hidden="true">
+        <div class="phone"><div class="scr" id="stickyScr">
+          <img data-screen="depense" src="assets/img/depense-jour.webp" width="393" height="852" alt="">
+          <img data-screen="carnet" class="out" src="assets/img/carnet-jour.webp" width="393" height="852" loading="lazy" alt="">
+          <img data-screen="transfert" class="out" src="assets/img/transfert-jour.webp" width="393" height="852" loading="lazy" alt="">
+          <img data-screen="bilan" class="out" src="assets/img/bilan-jour.webp" width="393" height="852" loading="lazy" alt="">
+        </div></div>
+      </div>
+    </div>
+  </section>
 
-  <h3>Comment noter une dépense ?</h3>
-  <p>Touche la pièce dorée « Dépense », tape le montant sur la caisse, choisis le bocal et valide. Si le bocal ne suffit pas, l'app te propose de combler avec un autre bocal ou de le laisser à découvert.</p>
+  <section class="band widgets" id="widgets" aria-labelledby="w-t">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="display" id="w-t">Tes bocaux, sans ouvrir l'app.</h2>
+        <p class="body">Des widgets pour l'écran d'accueil et l'écran verrouillé : ce qu'il reste ce mois-ci, et le bocal qui commence à se vider.</p>
+      </div>
+      <div class="duo">
+        <div class="phone a"><div class="scr"><img src="assets/img/widgets-accueil.webp" width="393" height="852" loading="lazy" alt="Écran d'accueil avec un widget moyen montrant quatre bocaux et un petit widget : il reste 781,90 €."></div></div>
+        <div class="phone b"><div class="scr"><img data-screen="widgets" src="assets/img/widgets-jour.webp" width="393" height="852" loading="lazy" alt="Écran verrouillé avec les widgets Bocaux."></div></div>
+      </div>
+    </div>
+  </section>
 
-  <h3>Comment supprimer une dépense ?</h3>
-  <p>Ouvre le bocal, puis appuie longuement sur la ligne du carnet et choisis « Supprimer ». L'argent retourne dans le bocal.</p>
+  <section class="band paper never" aria-labelledby="n-t">
+    <div class="wrap">
+      <h2 class="display" id="n-t">Ce que Bocaux ne te demandera jamais.</h2>
+      <ul>
+        <li style="--r:-2deg">de créer un compte</li>
+        <li style="--r:1.5deg">l'accès à ta banque</li>
+        <li style="--r:-1deg">tes données</li>
+        <li style="--r:2deg">de regarder une pub</li>
+      </ul>
+      <p class="body after">Tes bocaux vivent sur ton iPhone. La sauvegarde passe par ton propre iCloud, que toi seul peux lire, et tu peux la couper dans les réglages.</p>
+    </div>
+  </section>
 
-  <h3>Que se passe-t-il en fin de mois ?</h3>
-  <p>Au premier lancement du mois suivant, le mois est bouclé : ce qui reste dans les bocaux part dans l'Épargne (désactivable dans Réglages › Fin de mois) et le bilan du mois s'ouvre.</p>
+  <section class="band" aria-labelledby="c-t">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="display" id="c-t">Ce qu'il y a dans le placard.</h2>
+      </div>
+      <div class="ledger">
+        <dl>
+          <div class="row"><dt>Des bocaux à ton nom</dt><span class="dots"></span><dd>forme, couvercle, cible</dd></div>
+          <div class="row"><dt>La répartition de la paie</dt><span class="dots"></span><dd>à la main ou d'un coup</dd></div>
+          <div class="row"><dt>Les transferts entre bocaux</dt><span class="dots"></span><dd>quand l'un est à sec</dd></div>
+          <div class="row"><dt>La fin de mois</dt><span class="dots"></span><dd>le reste part à l'Épargne</dd></div>
+          <div class="row"><dt>L'historique et l'export CSV</dt><span class="dots"></span><dd>mois par mois</dd></div>
+          <div class="row"><dt>Les widgets</dt><span class="dots"></span><dd>accueil et verrouillé</dd></div>
+          <div class="row"><dt>Le mode nuit</dt><span class="dots"></span><dd>comme ici, tire le cordon</dd></div>
+          <div class="row"><dt>Le tintement des pièces</dt><span class="dots"></span><dd>et les vibrations</dd></div>
+          <div class="row"><dt>VoiceOver et grands caractères</dt><span class="dots"></span><dd>pris en charge</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
 
-  <h3>Comment ajouter un widget ?</h3>
-  <p>Écran d'accueil : appuie longuement sur un espace vide › Modifier › Ajouter un widget › Bocaux. Écran verrouillé : appuie longuement › Personnaliser › Écran verrouillé › zone des widgets › Bocaux.</p>
-
-  <h3>Mes données sont-elles en sécurité ?</h3>
-  <p>Bocaux n'a ni compte ni serveur : tout reste sur ton iPhone, et dans ton iCloud privé si la sauvegarde est activée. Voir la <a href="privacy.html">politique de confidentialité</a>.</p>
-
-  <h3>Je change d'iPhone, je retrouve mes bocaux ?</h3>
-  <p>Oui, si la sauvegarde iCloud était activée dans Réglages et que tu utilises le même compte iCloud sur le nouvel iPhone.</p>
-
-  <h3>Comment exporter mes dépenses ?</h3>
-  <p>Réglages › Exporter le carnet : un fichier CSV (date, bocal, libellé, montant, note) lisible dans Numbers ou Excel.</p>
-
-  <h3>Les sons ou les vibrations me gênent</h3>
-  <p>Réglages › « Tintement des pièces » et « Vibrations » se coupent séparément. Les sons respectent aussi le bouton silencieux de l'iPhone.</p>
+  <section class="band final" aria-labelledby="f-t">
+    <div class="wrap">
+      <h2 class="display" id="f-t">Ton premier bocal t'attend.</h2>
+      <div class="actions"><a class="btn store" href="#"><span><small>Télécharger sur</small>l'App Store</span></a></div>
+    </div>
+    <div class="shelf-row" id="finalShelf" aria-hidden="true"></div>
+    <div class="plank" aria-hidden="true"></div>
+  </section>
 </main>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 Bryan Bôle. Bocaux pour iPhone.</p>
+    <nav aria-label="Liens légaux">
+      <a href="privacy.html">Confidentialité</a>
+      <a href="support.html">Assistance</a>
+      <a href="mailto:bryanbole.dev@gmail.com">bryanbole.dev@gmail.com</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/jars-lib.js"></script>
+<script src="assets/app.js"></script>
 </body>
 </html>
