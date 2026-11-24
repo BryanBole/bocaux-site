@@ -12,8 +12,6 @@
   const euros0 = (v) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
 
   $$('.store').forEach((a) => { a.href = APP_STORE_URL; a.rel = 'noopener'; });
-  // Bouton de l'en-tête : visible seulement une fois le hero dépassé.
-  new IntersectionObserver(([en]) => $('#top').classList.toggle('past', !en.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe($('.hero .actions'));
   // Boutons App Store légèrement aimantés vers le pointeur.
   if (matchMedia('(hover: hover) and (pointer: fine)').matches && !reduce) $$('.badge').forEach((b) => {
     b.addEventListener('pointermove', (e) => {

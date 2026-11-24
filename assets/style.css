@@ -276,7 +276,4 @@ footer nav{display:flex;gap:1.5rem;flex-wrap:wrap}
 .badge.sm .ico{width:17px;height:20px}
 .badge.sm small{display:none}
 .badge.sm b{font-size:16px}
-/* Dans l'en-tête, le bouton n'apparaît qu'une fois le hero dépassé (un seul bouton visible à la fois). */
-.top .badge{transform:translateY(-8px);opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease,translate .35s cubic-bezier(.2,.7,.2,1)}
-.top.past .badge{transform:none;opacity:1;pointer-events:auto}
-@media (max-width:520px){.top .badge{display:none}}
+@media (max-width:420px){.top .badge.sm{padding:6px 12px 6px 10px}.top .badge.sm b{font-size:14px}}
