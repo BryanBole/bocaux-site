@@ -36,7 +36,15 @@
   setNight(root.classList.contains('nuit'), false);
   let pull = null, swallowClick = false;
   const rest = () => parseFloat(getComputedStyle(cord).getPropertyValue('--rest')) || 96;
-  const toggleLamp = () => { setNight(!root.classList.contains('nuit')); sKey(); };
+  const toggleLamp = () => {
+    sKey();
+    const go = () => setNight(!root.classList.contains('nuit'));
+    if (reduce || !document.startViewTransition) return go();
+    const b = cord.querySelector('.bead').getBoundingClientRect();
+    root.style.setProperty('--cx', b.left + b.width / 2 + 'px');
+    root.style.setProperty('--cy', b.top + b.height / 2 + 'px');
+    document.startViewTransition(go);
+  };
   cord.addEventListener('pointerdown', (e) => { pull = { y: e.clientY, dy: 0 }; cord.setPointerCapture(e.pointerId); cord.classList.add('pulling'); });
   cord.addEventListener('pointermove', (e) => {
     if (!pull) return;
@@ -61,7 +69,16 @@
 
   // ——— En-tête ———
   const top = $('#top');
-  const onScroll = () => top.classList.toggle('scrolled', scrollY > 8);
+  const progress = $('#progress');
+  let lastY = scrollY;
+  const onScroll = () => {
+    const y = scrollY;
+    top.classList.toggle('scrolled', y > 8);
+    top.classList.toggle('hide', y > 420 && y > lastY + 2);
+    if (y < lastY - 2 || y < 420) top.classList.remove('hide');
+    lastY = y;
+    progress.style.setProperty('--p', Math.min(1, y / Math.max(1, document.documentElement.scrollHeight - innerHeight)));
+  };
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
   // ——— Démo : range ta paie ———
@@ -90,14 +107,24 @@
     const h = el.querySelector('.holder');
     const full = f >= s.target;
     h.classList.toggle('full', full);
-    h.querySelector('b').textContent = euros0(f);
+    const bEl = h.querySelector('b');
+    if (bEl.textContent && bEl.textContent !== euros0(f) && !reduce) { bEl.classList.remove('bump'); void bEl.offsetWidth; bEl.classList.add('bump'); }
+    bEl.textContent = euros0(f);
     h.querySelector('span').textContent = full ? 'complet' : 'sur ' + euros0(s.target);
     el.setAttribute('aria-label', `${s.name} : ${euros0(f)} rangés sur ${euros0(s.target)}${full ? ', complet' : ''}. Ranger 50 €.`);
+  };
+  let shown = PAY, raf = 0;
+  const tween = (el, to) => {
+    cancelAnimationFrame(raf);
+    if (reduce) { shown = to; el.textContent = euros(to); return; }
+    const from = shown, t0 = performance.now();
+    const step = (t) => { const k = Math.min(1, (t - t0) / 420), e = 1 - Math.pow(1 - k, 3); shown = from + (to - from) * e; el.textContent = euros(Math.round(shown)); if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
   };
   const renderPot = () => {
     const r = remaining();
     potArt.innerHTML = jarSVG(mk({ name: 'À répartir', shape: 'wide', lid: 'g-honey', seed: 101, mix: [0.3, 0.45], bills: r > 400 ? [[-16, -4, -2]] : [], calm: true, ratio: r / PAY }, 0));
-    $('#potAmt').textContent = euros(r);
+    tween($('#potAmt'), r);
     $('#potSub').textContent = r > 0 ? 'ta paie du mois, encore à répartir' : 'tout est rangé';
     pot.classList.toggle('empty', r <= 0);
     pot.setAttribute('aria-label', `Jarre À répartir : ${euros(r)}`);
@@ -159,7 +186,9 @@
   const hand = $('#handful');
   let grab = null;
   const hotJar = (x, y) => { const el = document.elementFromPoint(x, y); return el && el.closest('.jar'); };
+  let touched = false;
   pot.addEventListener('pointerdown', (e) => {
+    touched = true;
     if (remaining() <= 0) return;
     e.preventDefault();
     pot.setPointerCapture(e.pointerId);
@@ -192,11 +221,21 @@
   pot.addEventListener('pointercancel', () => { if (grab) { clearInterval(grab.timer); hand.classList.remove('on'); grab.hot && grab.hot.classList.remove('hot'); grab = null; } });
   pot.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#doneMsg').textContent = 'Au clavier, choisis un bocal et appuie sur Entrée pour y ranger 50 €.'; } });
 
+  const demoSec = $('#demo');
+  let demoVisible = false;
+  new IntersectionObserver(([en]) => { demoVisible = en.isIntersecting; }, { threshold: 0.4 }).observe(demoSec);
+  if (!reduce) setInterval(() => {
+    if (touched || !demoVisible || remaining() <= 0) return;
+    pot.classList.remove('hint-wiggle'); void pot.offsetWidth; pot.classList.add('hint-wiggle');
+  }, 4200);
+
   jarsEl.addEventListener('click', (e) => {
+    touched = true;
     const j = e.target.closest('.jar');
     if (j) deposit(j.dataset.id, 50, centerOf(pot));
   });
   $('#fill').addEventListener('click', async () => {
+    touched = true;
     for (const s of SPECS) {
       const need = s.target - state.filled[s.id];
       if (need > 0) { deposit(s.id, need, centerOf(pot)); await new Promise((r) => setTimeout(r, reduce ? 0 : 230)); }
@@ -208,16 +247,60 @@
     renderAll();
   });
 
-  // ——— Le mois : le téléphone suit le texte ———
-  const stickyImgs = $$('#stickyScr img');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => {
-      if (!en.isIntersecting) return;
-      $$('.step').forEach((s) => s.classList.toggle('on', s === en.target));
-      stickyImgs.forEach((img) => img.classList.toggle('out', img.dataset.screen !== en.target.dataset.screen));
-    });
-  }, { rootMargin: '-45% 0px -45% 0px' });
-  $$('.step').forEach((s) => io.observe(s));
+  // ——— Le reste du mois : onglets, défilement automatique, glisser sur mobile ———
+  const tabs = $$('.tab'), sImgs = $$('#storyScr img'), storySec = $('#mois'), mDesc = $('#mDesc');
+  let cur = 0, timer = 0, auto = !reduce, storyVisible = false;
+  const DUR = 6500;
+  storySec.style.setProperty('--dur', DUR + 'ms');
+  mDesc.textContent = tabs[0].querySelector('.d').textContent;
+  const restart = () => {
+    clearTimeout(timer);
+    storySec.classList.remove('playing');
+    if (!auto || !storyVisible) return;
+    void storySec.offsetWidth;
+    storySec.classList.add('playing');
+    timer = setTimeout(() => show((cur + 1) % tabs.length, 1), DUR);
+  };
+  const show = (i, dir = 1) => {
+    if (i === cur) return restart();
+    const prev = sImgs[cur], next = sImgs[i];
+    tabs.forEach((t, k) => { const on = k === i; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
+    $('#panel').setAttribute('aria-labelledby', tabs[i].id);
+    next.alt = tabs[i].dataset.alt; prev.alt = '';
+    mDesc.textContent = tabs[i].querySelector('.d').textContent;
+    next.style.zIndex = 2; prev.style.zIndex = 1;
+    next.classList.remove('out');
+    if (!reduce) {
+      const ease = 'cubic-bezier(.2,.9,.25,1)';
+      next.animate([{ transform: `translateX(${dir * 105}%) rotate(${dir * 8}deg)` }, { transform: 'none' }], { duration: 620, easing: ease });
+      prev.animate([{ transform: 'none', opacity: 1, filter: 'brightness(1)' }, { transform: `translateX(${-dir * 30}%) scale(.9)`, opacity: 0.2, filter: 'brightness(.7)' }], { duration: 620, easing: ease })
+        .finished.then(() => { if (sImgs[cur] !== prev) prev.classList.add('out'); });
+      $('#storyPhone').animate([{ transform: 'rotateY(0) rotateZ(0)' }, { transform: `rotateY(${-dir * 10}deg) rotateZ(${dir * 1.5}deg)` }, { transform: 'rotateY(0) rotateZ(0)' }], { duration: 700, easing: 'ease-out' });
+    } else prev.classList.add('out');
+    if (matchMedia('(max-width: 900px)').matches) tabs[i].parentElement.scrollTo({ left: tabs[i].offsetLeft - tabs[0].offsetLeft, behavior: reduce ? 'auto' : 'smooth' });
+    cur = i;
+    restart();
+  };
+  tabs.forEach((t, i) => t.addEventListener('click', () => { auto = false; show(i, i > cur ? 1 : -1); }));
+  $('.tabs').addEventListener('keydown', (e) => {
+    const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    if (!k) return;
+    e.preventDefault(); auto = false;
+    const i = (cur + k + tabs.length) % tabs.length;
+    show(i, k); tabs[i].focus();
+  });
+  new IntersectionObserver(([en]) => { storyVisible = en.isIntersecting; restart(); }, { threshold: 0.35 }).observe(storySec);
+  let sw = null;
+  const sp = $('.story-phone');
+  sp.addEventListener('pointerdown', (e) => { sw = { x: e.clientX, y: e.clientY }; });
+  sp.addEventListener('pointerup', (e) => {
+    if (!sw) return;
+    const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    auto = false;
+    const d = dx < 0 ? 1 : -1;
+    show((cur + d + tabs.length) % tabs.length, d);
+  });
 
   // ——— Étagère finale ———
   const FINAL = [
@@ -228,8 +311,90 @@
     { name: 'Cadeaux', left: 65, target: 80, shape: 'round', lid: 'm-brass', seed: 53, mix: [0.4, 0.35] },
     { name: 'Sorties', left: 14.5, target: 120, shape: 'squat', lid: 'g-sage', seed: 37, mix: [0.6, 0.2] },
   ];
-  $('#finalShelf').innerHTML = FINAL.map((o, i) => `<span class="art" style="position:relative">${jarSVG(mk(o, i))}</span>`).join('');
+  const finalShelf = $('#finalShelf');
+  const drawFinal = (k) => { finalShelf.innerHTML = FINAL.map((o, i) => `<span class="art" style="position:relative">${jarSVG(mk({ ...o, ratio: (o.left / o.target) * k, bills: k > 0.6 ? o.bills : [] }, i))}</span>`).join(''); };
+  drawFinal(reduce ? 1 : 0);
+  const fillFinal = () => {
+    if (reduce) return;
+    const t0 = performance.now();
+    const step = (t) => { const k = Math.min(1, (t - t0) / 1400); drawFinal(1 - Math.pow(1 - k, 3)); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+
+  // ——— Apparitions au défilement (une seule fois) ———
+  $$('.never li').forEach((li, i) => li.style.setProperty('--i', i));
+  $$('.ledger .row').forEach((r, i) => r.style.setProperty('--i', i));
+  const revealIO = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('in');
+      $$(':scope > [data-reveal]', en.target).forEach((h) => h.classList.add('in'));
+      if (en.target === finalShelf) fillFinal();
+      if (en.target.classList.contains('duo')) setTimeout(() => en.target.classList.add('settled'), 1300);
+      revealIO.unobserve(en.target);
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+  [...new Set($$('[data-reveal]').map((h) => h.parentElement)), $('.never'), $('#ledger'), $('.duo'), finalShelf].forEach((el) => revealIO.observe(el));
+
+  // ——— Widgets : léger décalage au défilement ———
+  const duo = $('.duo'), duoA = $('.duo .a'), duoB = $('.duo .b');
+  if (!reduce) addEventListener('scroll', () => {
+    const r = duo.getBoundingClientRect();
+    const p = (innerHeight / 2 - (r.top + r.height / 2)) / innerHeight;
+    duoA.style.setProperty('--py', (p * -50).toFixed(1) + 'px');
+    duoB.style.setProperty('--py', (p * 50).toFixed(1) + 'px');
+  }, { passive: true });
+
+  // ——— Hero : mots du titre, téléphone qui tombe sur l'étagère, quelques pièces ———
+  const h1 = $('#h1');
+  let wi = 0;
+  const split = (node) => {
+    [...node.childNodes].forEach((n) => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(part));
+          else { const w = document.createElement('span'); w.className = 'w'; w.style.setProperty('--i', wi++); w.textContent = part; frag.appendChild(w); }
+        });
+        n.replaceWith(frag);
+      } else split(n);
+    });
+  };
+  h1.setAttribute('aria-label', h1.textContent); split(h1);
+  [...h1.children].forEach((c) => c.setAttribute('aria-hidden', 'true'));
+
+  const heroPhone = $('#heroPhone'), heroPlank = $('.hero .plank');
+  const dropCoins = () => {
+    if (reduce) return;
+    const pr = heroPlank.getBoundingClientRect(), ph = heroPhone.getBoundingClientRect();
+    const spots = [-70, -44, -58, ph.width + 26, ph.width + 52];
+    spots.forEach((dx, i) => {
+      const c = document.createElement('span');
+      c.className = 'droppedcoin ' + ['', 'cu', 'ag', 'cu', ''][i];
+      c.style.left = ((ph.left - pr.left + dx) / pr.width * 100).toFixed(2) + '%';
+      if (i === 2) c.style.bottom = 'calc(100% + 18px)';
+      heroPlank.appendChild(c);
+      c.animate([
+        { transform: 'translateY(-70vh) rotate(0)', opacity: 1 },
+        { transform: 'translateY(0) rotate(160deg)', offset: 0.62 },
+        { transform: 'translateY(-26px) rotate(200deg)', offset: 0.78 },
+        { transform: 'translateY(0) rotate(230deg)', offset: 0.9 },
+        { transform: 'translateY(-6px) rotate(236deg)', offset: 0.95 },
+        { transform: 'translateY(0) rotate(240deg)' },
+      ], { duration: 1100, delay: 900 + i * 120, easing: 'cubic-bezier(.45,0,.75,.6)', fill: 'backwards' });
+    });
+  };
+  if (matchMedia('(pointer: fine)').matches && !reduce) {
+    const ph = heroPhone.querySelector('.phone');
+    $('.hero').addEventListener('pointermove', (e) => {
+      const r = heroPhone.getBoundingClientRect();
+      const x = (e.clientX - (r.left + r.width / 2)) / innerWidth, y = (e.clientY - (r.top + r.height / 2)) / innerHeight;
+      ph.style.transform = `perspective(1000px) rotateY(${(x * 14).toFixed(2)}deg) rotateX(${(-y * 10).toFixed(2)}deg)`;
+    });
+    $('.hero').addEventListener('pointerleave', () => { ph.style.transform = ''; });
+  }
 
   // ——— Entrée ———
-  requestAnimationFrame(() => requestAnimationFrame(() => { root.classList.remove('intro'); root.classList.add('ready'); }));
+  requestAnimationFrame(() => requestAnimationFrame(() => { root.classList.remove('intro'); root.classList.add('ready'); dropCoins(); }));
 })();

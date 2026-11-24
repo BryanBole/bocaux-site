@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" class="intro">
+<html lang="fr" class="intro js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,7 +43,7 @@
   <span class="string"></span><span class="bead"></span><span class="tip" id="cordTip">tire-moi</span>
 </button>
 
-<header class="top" id="top">
+<header class="top" id="top"><span class="progress" id="progress" aria-hidden="true"></span>
   <div class="wrap">
     <a class="brand" href="#"><svg aria-hidden="true"><use href="#logo"/></svg>Bocaux</a>
     <nav aria-label="Navigation">
@@ -66,7 +66,7 @@
           <p class="note">sans compte, sans banque connectée</p>
         </div>
       </div>
-      <div class="hero-phone">
+      <div class="hero-phone" id="heroPhone">
         <div class="phone"><div class="scr"><img data-screen="etagere" src="assets/img/etagere-jour.webp" width="393" height="852" alt="L'écran principal de Bocaux : il reste 781,90 € ce mois-ci, rangés dans six bocaux sur une étagère." fetchpriority="high"></div></div>
       </div>
     </div>
@@ -76,7 +76,7 @@
   <section class="band demo" id="demo" aria-labelledby="demo-t">
     <div class="wrap">
       <div>
-        <h2 class="display" id="demo-t">Essaie, là, tout de suite.</h2>
+        <h2 class="display" id="demo-t" data-reveal>Essaie, là, tout de suite.</h2>
         <p class="body" style="margin-top:1.2rem">C'est le geste du 1er du mois dans Bocaux : ta paie arrive dans la jarre, et tu la répartis à la main entre tes bocaux.</p>
         <div class="how" aria-hidden="true">
           <p>appuie sur la jarre…</p>
@@ -105,37 +105,31 @@
 
   <section class="band paper story" id="mois" aria-labelledby="mois-t">
     <div class="wrap">
-      <div>
-        <h2 class="display sr" id="mois-t">Le reste du mois</h2>
-        <div class="steps" id="steps">
-          <article class="step" data-screen="depense">
-            <h3>Une dépense, à la caisse.</h3>
-            <p class="body">Tape le montant sur le clavier, choisis le bocal, encaisse. Les pièces sortent du bocal et le compte du jour se met à jour.</p>
-            <div class="m-phone phone"><div class="scr"><img data-screen="depense" src="assets/img/depense-jour.webp" width="393" height="852" loading="lazy" alt="Écran de dépense : un clavier de caisse enregistreuse et le choix du bocal."></div></div>
-          </article>
-          <article class="step" data-screen="carnet">
-            <h3>Chaque bocal a son carnet.</h3>
-            <p class="body">Toutes les dépenses du mois, écrites à la main, et ce que tu peux encore dépenser par jour jusqu'à la paie.</p>
-            <div class="m-phone phone"><div class="scr"><img data-screen="carnet" src="assets/img/carnet-jour.webp" width="393" height="852" loading="lazy" alt="Le carnet du bocal Courses, avec les dépenses du mois et le reste par jour."></div></div>
-          </article>
-          <article class="step" data-screen="transfert">
-            <h3>Un bocal à sec ? Un autre le dépanne.</h3>
-            <p class="body">Fais glisser quelques pièces d'un bocal à l'autre. Rien ne disparaît, tout se voit.</p>
-            <div class="m-phone phone"><div class="scr"><img data-screen="transfert" src="assets/img/transfert-jour.webp" width="393" height="852" loading="lazy" alt="Transfert de pièces d'un bocal vers un autre."></div></div>
-          </article>
-          <article class="step" data-screen="bilan">
-            <h3>Le mois, en une page.</h3>
-            <p class="body">À la fin du mois, le bilan tient sur une feuille. Ce qui reste peut partir tout seul dans l'Épargne.</p>
-            <div class="m-phone phone"><div class="scr"><img data-screen="bilan" src="assets/img/bilan-jour.webp" width="393" height="852" loading="lazy" alt="Le bilan du mois, bocal par bocal, avec le reste versé à l'épargne."></div></div>
-          </article>
+      <div class="story-copy">
+        <h2 class="display" id="mois-t" data-reveal>Et le reste du mois.</h2>
+        <div class="tabs" role="tablist" aria-label="Les écrans de Bocaux">
+          <button class="tab on" type="button" role="tab" id="tab-depense" aria-controls="panel" aria-selected="true" tabindex="0" data-screen="depense" data-alt="Écran de dépense : un clavier de caisse enregistreuse et le choix du bocal.">
+            <span class="t">Une dépense, à la caisse.</span><span class="d">Tape le montant sur le clavier, choisis le bocal, encaisse. Les pièces sortent du bocal et le compte du jour se met à jour.</span><span class="bar"><i></i></span>
+          </button>
+          <button class="tab" type="button" role="tab" id="tab-carnet" aria-controls="panel" aria-selected="false" tabindex="-1" data-screen="carnet" data-alt="Le carnet du bocal Courses, avec les dépenses du mois et le reste par jour.">
+            <span class="t">Chaque bocal a son carnet.</span><span class="d">Toutes les dépenses du mois, écrites à la main, et ce que tu peux encore dépenser par jour jusqu'à la paie.</span><span class="bar"><i></i></span>
+          </button>
+          <button class="tab" type="button" role="tab" id="tab-transfert" aria-controls="panel" aria-selected="false" tabindex="-1" data-screen="transfert" data-alt="Transfert de pièces d'un bocal vers un autre.">
+            <span class="t">Un bocal à sec ? Un autre le dépanne.</span><span class="d">Fais glisser quelques pièces d'un bocal à l'autre. Rien ne disparaît, tout se voit.</span><span class="bar"><i></i></span>
+          </button>
+          <button class="tab" type="button" role="tab" id="tab-bilan" aria-controls="panel" aria-selected="false" tabindex="-1" data-screen="bilan" data-alt="Le bilan du mois, bocal par bocal, avec le reste versé à l'épargne.">
+            <span class="t">Le mois, en une page.</span><span class="d">À la fin du mois, le bilan tient sur une feuille. Ce qui reste peut partir tout seul dans l'Épargne.</span><span class="bar"><i></i></span>
+          </button>
         </div>
+        <p class="m-desc" id="mDesc" aria-hidden="true"></p>
+        <p class="hint" aria-hidden="true">glisse le téléphone pour changer d'écran</p>
       </div>
-      <div class="sticky" aria-hidden="true">
-        <div class="phone"><div class="scr" id="stickyScr">
-          <img data-screen="depense" src="assets/img/depense-jour.webp" width="393" height="852" alt="">
-          <img data-screen="carnet" class="out" src="assets/img/carnet-jour.webp" width="393" height="852" loading="lazy" alt="">
-          <img data-screen="transfert" class="out" src="assets/img/transfert-jour.webp" width="393" height="852" loading="lazy" alt="">
-          <img data-screen="bilan" class="out" src="assets/img/bilan-jour.webp" width="393" height="852" loading="lazy" alt="">
+      <div class="story-phone" id="panel" role="tabpanel" aria-labelledby="tab-depense">
+        <div class="phone" id="storyPhone"><div class="scr" id="storyScr">
+            <img data-screen="depense" class="" src="assets/img/depense-jour.webp" width="393" height="852" alt="Écran de dépense : un clavier de caisse enregistreuse et le choix du bocal.">
+            <img data-screen="carnet" class="out" src="assets/img/carnet-jour.webp" width="393" height="852" loading="lazy" alt="">
+            <img data-screen="transfert" class="out" src="assets/img/transfert-jour.webp" width="393" height="852" loading="lazy" alt="">
+            <img data-screen="bilan" class="out" src="assets/img/bilan-jour.webp" width="393" height="852" loading="lazy" alt="">
         </div></div>
       </div>
     </div>
@@ -144,7 +138,7 @@
   <section class="band widgets" id="widgets" aria-labelledby="w-t">
     <div class="wrap">
       <div class="head">
-        <h2 class="display" id="w-t">Tes bocaux, sans ouvrir l'app.</h2>
+        <h2 class="display" id="w-t" data-reveal>Tes bocaux, sans ouvrir l'app.</h2>
         <p class="body">Des widgets pour l'écran d'accueil et l'écran verrouillé : ce qu'il reste ce mois-ci, et le bocal qui commence à se vider.</p>
       </div>
       <div class="duo">
@@ -156,7 +150,7 @@
 
   <section class="band paper never" aria-labelledby="n-t">
     <div class="wrap">
-      <h2 class="display" id="n-t">Ce que Bocaux ne te demandera jamais.</h2>
+      <h2 class="display" id="n-t" data-reveal>Ce que Bocaux ne te demandera jamais.</h2>
       <ul>
         <li style="--r:-2deg">de créer un compte</li>
         <li style="--r:1.5deg">l'accès à ta banque</li>
@@ -170,9 +164,9 @@
   <section class="band" aria-labelledby="c-t">
     <div class="wrap">
       <div class="head">
-        <h2 class="display" id="c-t">Ce qu'il y a dans le placard.</h2>
+        <h2 class="display" id="c-t" data-reveal>Ce qu'il y a dans le placard.</h2>
       </div>
-      <div class="ledger">
+      <div class="ledger" id="ledger">
         <dl>
           <div class="row"><dt>Des bocaux à ton nom</dt><span class="dots"></span><dd>forme, couvercle, cible</dd></div>
           <div class="row"><dt>La répartition de la paie</dt><span class="dots"></span><dd>à la main ou d'un coup</dd></div>
@@ -190,7 +184,7 @@
 
   <section class="band final" aria-labelledby="f-t">
     <div class="wrap">
-      <h2 class="display" id="f-t">Ton premier bocal t'attend.</h2>
+      <h2 class="display" id="f-t" data-reveal>Ton premier bocal t'attend.</h2>
       <div class="actions"><a class="btn store" href="#"><span><small>Télécharger sur</small>l'App Store</span></a></div>
     </div>
     <div class="shelf-row" id="finalShelf" aria-hidden="true"></div>
