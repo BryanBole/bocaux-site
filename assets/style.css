@@ -261,3 +261,10 @@ footer nav{display:flex;gap:1.5rem;flex-wrap:wrap}
   .js [data-reveal],.js .never li,.js .ledger .row *,.js .duo .phone{clip-path:none!important;opacity:1!important;transform:none!important;translate:none!important}
 }
 .js .duo.settled .phone{transition:opacity .6s ease}
+
+/* Badge officiel App Store */
+.badge{display:inline-block;line-height:0;border-radius:12px;transition:transform .15s ease}
+.badge img{height:60px;width:auto}
+.badge:hover{transform:translateY(-2px)}
+.badge:active{transform:translateY(1px)}
+.top .badge img{height:40px}
